@@ -23,9 +23,11 @@ survivors by how well their text and style tags overlap the user's free-text des
 - `description` (str): The free-text item the user wants, e.g. `"vintage graphic tee"`. Tokenized
   and matched against each listing's `title`, `description`, `style_tags`, `category`, and `colors`.
 - `size` (str, optional, default `None`): Desired size, e.g. `"M"`. A listing passes the size
-  filter if its `size` field contains the requested token (case-insensitive substring match) OR the
-  listing's `size` indicates it is size-flexible (`"one size"`, `"oversized"`, `"adjustable"`,
-  `"fits most"`). When `None`, the size filter is skipped.
+  filter if the requested size appears as a discrete token in its `size` field (so `"M"` matches
+  `"S/M"` and `"M/L"` but not `"US 9"`) OR the listing is truly size-agnostic (`"one size"`,
+  `"adjustable"`, `"fits most"`). `"oversized"` is **not** treated as a wildcard — those listings
+  carry a real size token (e.g. `"XL (oversized)"`) and match on it. When `None`, the size filter is
+  skipped.
 - `max_price` (float, optional, default `None`): Inclusive price ceiling. A listing passes if
   `listing["price"] <= max_price`. When `None`, the price filter is skipped.
 

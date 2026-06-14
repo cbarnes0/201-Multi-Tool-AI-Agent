@@ -33,10 +33,12 @@ _STOPWORDS = {
     "whats", "out", "there", "how", "would", "style", "it", "around", "about",
 }
 
-# A listing whose size string contains any of these is treated as size-flexible
-# and passes the size filter regardless of the requested size.
+# A listing whose size string contains any of these is treated as truly
+# size-agnostic and passes the size filter regardless of the requested size.
+# Note: "oversized" is deliberately excluded — those listings carry a real size
+# token (e.g. "XL (oversized)"), so they should match on that token, not wildcard.
 _FLEXIBLE_SIZE_MARKERS = (
-    "one size", "oversized", "adjustable", "fits most", "fits oversized",
+    "one size", "adjustable", "fits most",
 )
 
 

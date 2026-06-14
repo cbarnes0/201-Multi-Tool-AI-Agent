@@ -1,0 +1,59 @@
+======================================================================
+FitFindr — Error Handling Verification (Milestone 5)
+======================================================================
+Each of the three tools was deliberately driven into its failure mode.
+None raised an uncaught exception; each produced a specific, informative
+response and the agent recovered gracefully.
+
+----------------------------------------------------------------------
+[FAILURE 1] search_listings returns zero results
+----------------------------------------------------------------------
+>>> search_listings("designer ballgown", size="XXS", max_price=5)
+    []   <- empty list, no exception
+
+>>> full agent on the same impossible query:
+    error          : No listings matched 'designer ballgown' in size XXS
+                     under $5. Try raising your budget, changing the size,
+                     or using fewer keywords.
+    selected_item  : None
+    outfit / card  : None / None
+
+    -> The agent stops at the search step and never calls suggest_outfit
+       or create_fit_card with empty input.
+
+----------------------------------------------------------------------
+[FAILURE 2] suggest_outfit with an EMPTY wardrobe
+----------------------------------------------------------------------
+>>> item = search_listings("vintage graphic tee", None, 50)[0]
+>>> suggest_outfit(item, get_empty_wardrobe())
+
+    Returns useful general styling advice (not empty, no exception),
+    e.g.:
+    "Pair the Y2K Baby Tee with high-waisted jeans or a flowy skirt for
+     a nostalgic, casual look. Add sneakers or sandals for a relaxed
+     vibe, or dress it up with heeled ankle boots for a more polished
+     take. The tee's cottagecore charm also suits a flowy maxi skirt and
+     layered necklaces for a whimsical, feminine style."
+
+    -> Because the wardrobe is empty, the tool switches to a general
+       advice prompt instead of naming pieces the user doesn't own.
+
+----------------------------------------------------------------------
+[FAILURE 3] create_fit_card with an EMPTY outfit string
+----------------------------------------------------------------------
+>>> create_fit_card("", item)
+    Error: cannot create a fit card without an outfit suggestion. Run
+    suggest_outfit first and pass its result here.
+
+    -> Returns a descriptive error string and does NOT call the LLM or
+       raise a Python exception.
+
+======================================================================
+RESULT: All three failure modes trigger deliberately and produce a
+specific, informative response. No uncaught exceptions.
+======================================================================
+
+Reproduce with:
+  python -c "from tools import search_listings; print(search_listings('designer ballgown', size='XXS', max_price=5))"
+  python -c "from tools import search_listings, suggest_outfit; from utils.data_loader import get_empty_wardrobe; print(suggest_outfit(search_listings('vintage graphic tee', size=None, max_price=50)[0], get_empty_wardrobe()))"
+  python -c "from tools import search_listings, create_fit_card; print(create_fit_card('', search_listings('vintage graphic tee', size=None, max_price=50)[0]))"
